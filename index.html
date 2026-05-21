@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EED Matrix</title>
+<link rel="icon" type="image/png" href="assets/osas_logo.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/vendor/flatpickr.min.css">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="animated-bg" aria-hidden="true">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+  <div class="bg-wave wave-1"></div>
+  <div class="bg-wave wave-2"></div>
+</div>
+
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <img class="brand-logo" src="assets/osas_logo.png" alt="OSAS Logo">
+
+    <div class="brand-copy">
+      <div class="brand-tag">Office of Student Affairs and Services</div>
+      <div class="brand-sub">Organizational EED Matrix</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <span class="pill shortcut-pill" title="Keyboard shortcuts: N opens Add Entry, Esc closes forms and modals, Ctrl+F focuses search."><i class="bi bi-keyboard"></i></span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle night mode">
+      <span class="theme-toggle-track">
+        <span class="theme-toggle-thumb">
+          <i class="bi bi-sun-fill theme-sun"></i>
+          <i class="bi bi-moon-stars-fill theme-moon"></i>
+        </span>
+      </span>
+    </button>
+    <span class="pill"><span id="row-count">0</span> records</span>
+    <button class="btn btn-primary" id="btn-add">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Entry
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- SUMMARY -->
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="summary-label">
+        <i class="bi bi-card-list summary-icon"></i> Total Entries
+      </div>
+      <div class="summary-value" id="s-entries">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <i class="bi bi-boxes summary-icon"></i> Total Units
+      </div>
+      <div class="summary-value teal" id="s-units">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <i class="bi bi-receipt summary-icon"></i> Total COGS
+      </div>
+      <div class="summary-value" id="s-cogs">₱0.00</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <i class="bi bi-cash-stack summary-icon"></i> Total Net Proceeds
+      </div>
+      <div class="summary-value accent" id="s-total">₱0.00</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <i class="bi bi-graph-up summary-icon"></i> Proceeds Rate
+      </div>
+      <div class="summary-value green" id="s-margin">0.00%</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="search" id="search" placeholder="Search org, EED name..." />
+    </div>
+    <div class="toolbar-group">
+      <select id="filter-org"><option value="">All Orgs</option></select>
+      <select id="sort-by">
+        <option value="date-desc">Date ↓</option>
+        <option value="date-asc">Date ↑</option>
+        <option value="total-desc">Total ↓</option>
+        <option value="total-asc">Total ↑</option>
+        <option value="org-asc">Org A-Z</option>
+      </select>
+      <select id="filter-status">
+        <option value="">All Statuses</option>
+        <option value="Proposed">Proposed</option>
+        <option value="Approved">Approved</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="toolbar-group date-filter-group">
+      <div class="date-range-wrap">
+        <i class="bi bi-calendar-range"></i>
+        <input type="text" id="date-range" placeholder="Date range" readonly>
+      </div>
+      <button class="btn btn-ghost" id="btn-clear-dates">
+        <i class="bi bi-calendar-x"></i>
+        Clear Dates
+      </button>
+      <button class="btn btn-ghost" id="btn-reset-filters">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Reset Filters
+      </button>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="toolbar-group">
+      <input type="file" id="import-file" accept=".csv,.json,.xls,.xlsx" hidden>
+
+      <button class="btn btn-ghost" id="btn-import">
+        <i class="bi bi-upload"></i>
+        Import CSV / Excel / Backup
+      </button>
+
+      <button class="btn btn-ghost" id="btn-backup">
+        <i class="bi bi-save"></i>
+        Backup JSON
+      </button>
+      <button class="btn btn-ghost" id="btn-report">
+        <i class="bi bi-file-earmark-text"></i>
+        Print Report
+      </button>
+
+   <button class="btn btn-ghost" id="btn-export">
+  <i class="bi bi-download"></i>
+  Export Excel
+</button>
+      <button class="btn btn-ghost" id="btn-settings">
+        <i class="bi bi-gear"></i>
+        Settings
+      </button>
+      <button class="btn btn-ghost" id="btn-cert" style="color:var(--accent)">
+        <i class="bi bi-award"></i>
+        Certificate Maker
+      </button>
+      <button class="btn btn-ghost btn-danger" id="btn-clear-all" style="display:none">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Clear All
+      </button>
+    </div>
+  </div>
+
+  <!-- FORM PANEL -->
+  <div class="form-panel" id="form-panel">
+    <div class="form-title"><span>◆</span> <span id="form-panel-title">New Entry</span></div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Org Name *</label>
+        <input type="text" id="f-org" placeholder="e.g. Operations" data-text-only />
+      </div>
+      <div class="form-field">
+        <label>EED Name *</label>
+        <input type="text" id="f-eed" placeholder="e.g. Office Supplies" data-text-only />
+      </div>
+      <div class="form-field">
+        <label>Units *</label>
+        <input type="number" id="f-units" placeholder="0" min="0" step="1" />
+      </div>
+      <div class="form-field">
+        <label>Cost of Goods *</label>
+        <input type="number" id="f-cog" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-field">
+        <label>Selling Price *</label>
+        <input type="number" id="f-sp" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-field">
+        <label>Date *</label>
+        <input type="date" id="f-date" />
+      </div>
+      <div class="form-field">
+        <label>Date Proposed</label>
+        <input type="date" id="f-dateProposed" />
+      </div>
+      <div class="form-field">
+        <label>Date Approved</label>
+        <input type="date" id="f-dateApproved" />
+      </div>
+      <div class="form-field">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="Proposed">Proposed</option>
+          <option value="Approved">Approved</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+    <div class="calc-preview" id="f-calc-preview"></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="btn-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-save">Save Entry</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="bulk-bar" id="bulk-bar">
+      <strong><span id="bulk-count">0</span> selected</strong>
+      <button class="btn btn-ghost" id="bulk-export"><i class="bi bi-download"></i> Export Selected</button>
+      <button class="btn btn-ghost" id="bulk-cert"><i class="bi bi-award"></i> Certificate From Selected</button>
+      <select id="bulk-status">
+        <option value="">Change Status</option>
+        <option value="Proposed">Proposed</option>
+        <option value="Approved">Approved</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-ghost btn-danger" id="bulk-delete"><i class="bi bi-trash"></i> Delete Selected</button>
+    </div>
+    <div class="table-scroll">
+      <table id="eed-table">
+        <thead>
+          <tr>
+            <th class="select-col"><input type="checkbox" id="select-all-rows" aria-label="Select visible rows"></th>
+            <th>Control No.</th>
+            <th>Org Name</th>
+            <th>EED Name</th>
+            <th>Status</th>
+            <th style="text-align:right">Expected Quantity</th>
+            <th style="text-align:right">Cost of Goods</th>
+            <th style="text-align:right">Selling Price</th>
+            <th style="text-align:right">Markup Rate</th>
+            <th style="text-align:right">Total</th>
+            <th>Date</th>
+            <th>Date Proposed</th>
+            <th>Date Approved</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+   <div class="empty" id="empty-state">
+  <div class="empty-icon">
+    <i class="bi bi-plus-square"></i>
+  </div>
+  <p>No entries yet. Click <strong>Add Entry</strong> to get started.</p>
+</div>
+    <div class="pagination-bar" id="pagination-bar">
+      <div class="page-info" id="page-info">Showing 0–0 of 0</div>
+      <div class="page-controls">
+        <label class="page-size-label">Rows
+          <select id="page-size">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
+        <button class="icon-btn" id="page-prev" title="Previous page"><i class="bi bi-chevron-left"></i></button>
+        <span class="page-number" id="page-number">1 / 1</span>
+        <button class="icon-btn" id="page-next" title="Next page"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL: Edit -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title"><span style="color:var(--accent)">◆</span> Edit Entry</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Org Name *</label>
+        <input type="text" id="e-org" placeholder="e.g. Operations" data-text-only />
+      </div>
+      <div class="form-field">
+        <label>EED Name *</label>
+        <input type="text" id="e-eed" placeholder="e.g. Office Supplies" data-text-only />
+      </div>
+      <div class="form-field">
+        <label>Units *</label>
+        <input type="number" id="e-units" placeholder="0" min="0" step="1" />
+      </div>
+      <div class="form-field">
+        <label>Cost of Goods *</label>
+        <input type="number" id="e-cog" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-field">
+        <label>Selling Price *</label>
+        <input type="number" id="e-sp" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-field">
+        <label>Date *</label>
+        <input type="date" id="e-date" />
+      </div>
+      <div class="form-field">
+        <label>Date Proposed</label>
+        <input type="date" id="e-dateProposed" />
+      </div>
+      <div class="form-field">
+        <label>Date Approved</label>
+        <input type="date" id="e-dateApproved" />
+      </div>
+      <div class="form-field">
+        <label>Status</label>
+        <select id="e-status">
+          <option value="Proposed">Proposed</option>
+          <option value="Approved">Approved</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+    <div class="calc-preview" id="e-calc-preview"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="edit-cancel">Cancel</button>
+      <button class="btn btn-primary" id="edit-save">Update Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete confirm -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">
+      <svg width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Delete Entry?
+    </div>
+    <p style="color:var(--muted);line-height:1.6">The entry will be removed from the matrix. You can undo it briefly after deletion.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="del-cancel">Cancel</button>
+      <button class="btn btn-primary" id="del-confirm" style="background:var(--danger);color:#fff">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import preview -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title"><span style="color:var(--accent)">◆</span> Confirm Import</div>
+    <p class="import-preview-copy" id="import-preview-copy">Review the import before adding records.</p>
+    <div class="import-preview-box" id="import-preview-box"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="import-cancel">Cancel</button>
+      <button class="btn btn-primary" id="import-confirm">Import Records</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- MODAL: Certificate Maker -->
+<div class="modal-overlay" id="cert-modal">
+  <div class="cert-maker-wrap">
+    <div class="cert-maker-sidebar">
+      <div class="cert-sidebar-title"><i class="bi bi-award"></i> Certificate Maker</div>
+      <p class="cert-sidebar-note">Fill in the fields below then preview or print/download the certificate.</p>
+
+      <div class="cert-field-group">
+        <label>Organization Name</label>
+        <input type="text" id="c-org" placeholder="e.g. MaPAP Society" />
+      </div>
+      <div class="cert-field-group">
+        <label>EED Project Name</label>
+        <input type="text" id="c-project" placeholder="e.g. Organizational Shirt" />
+      </div>
+      <div class="cert-field-group">
+        <label>Approval Letter Date</label>
+        <input type="date" id="c-approvaldate" />
+      </div>
+      <div class="cert-field-group">
+        <label>Semester Validity</label>
+        <select id="c-semester">
+          <option value="First Semester">First Semester</option>
+          <option value="Second Semester" selected>Second Semester</option>
+        </select>
+      </div>
+      <div class="cert-field-group">
+        <label>Academic Year</label>
+        <input type="text" id="c-ay" placeholder="e.g. 2025-2026" />
+      </div>
+      <div class="cert-field-group">
+        <label>Given Date</label>
+        <input type="date" id="c-givendate" />
+      </div>
+      <div class="cert-field-group">
+        <label>Control No.</label>
+        <input type="text" id="c-ctrlno" placeholder="e.g. EED 26-27-0001" />
+      </div>
+
+      <hr class="cert-divider" />
+
+      <div class="cert-field-group">
+        <label>Signatory 1 - Name</label>
+        <input type="text" id="c-s1name" value="TEMMELIE JOY B. MATE" />
+      </div>
+      <div class="cert-field-group">
+        <label>Signatory 1 - Title</label>
+        <input type="text" id="c-s1title" value="Head, Economic Enterprise Development" />
+      </div>
+      <div class="cert-field-group">
+        <label>Signatory 2 - Name</label>
+        <input type="text" id="c-s2name" value="LAYZON BRIONES,MPA" />
+      </div>
+      <div class="cert-field-group">
+        <label>Signatory 2 - Title</label>
+        <input type="text" id="c-s2title" value="Chairperson, University Business Center" />
+      </div>
+      <div class="cert-field-group">
+        <label>Signatory 3 - Name</label>
+        <input type="text" id="c-s3name" value="SHERWIN D. QUIZON,MSIT" />
+      </div>
+      <div class="cert-field-group">
+        <label>Signatory 3 - Title</label>
+        <input type="text" id="c-s3title" value="Director, Student Development" />
+      </div>
+      <div class="cert-position-controls">
+        <div class="cert-field-group">
+          <label>Signatory 3 Y Offset</label>
+          <div class="stepper-row">
+            <button class="icon-btn cert-nudge" type="button" data-target="s3" data-delta="-2" title="Move down"><i class="bi bi-arrow-down"></i></button>
+            <input type="number" id="cert-s3-offset" value="0" step="1" />
+            <button class="icon-btn cert-nudge" type="button" data-target="s3" data-delta="2" title="Move up"><i class="bi bi-arrow-up"></i></button>
+          </div>
+        </div>
+        <div class="cert-field-group">
+          <label>Control No. Y Offset</label>
+          <div class="stepper-row">
+            <button class="icon-btn cert-nudge" type="button" data-target="ctrl" data-delta="-2" title="Move down"><i class="bi bi-arrow-down"></i></button>
+            <input type="number" id="cert-ctrl-offset" value="0" step="1" />
+            <button class="icon-btn cert-nudge" type="button" data-target="ctrl" data-delta="2" title="Move up"><i class="bi bi-arrow-up"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert-sidebar-actions">
+        <button class="btn btn-ghost" id="cert-close">Cancel</button>
+        <button class="btn btn-primary" id="cert-print"><i class="bi bi-printer"></i> Print / Save PDF</button>
+      </div>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="cert-preview-area">
+      <div class="cert-preview-label">Live Preview</div>
+      <div class="cert-scale-wrap" id="cert-scale-wrap">
+        <div class="cert-pdf-page">
+
+          <canvas id="cert-pdf-canvas"></canvas>
+          <div id="cert-overlay-layer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Settings -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title"><i class="bi bi-gear" style="color:var(--accent)"></i> Settings</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Control Number Prefix</label>
+        <input type="text" id="setting-ctrl-prefix" placeholder="CTRL NO. EED 26-27-" />
+      </div>
+      <div class="form-field">
+        <label>Next Control Number</label>
+        <input type="number" id="setting-ctrl-next" min="1" step="1" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="settings-cancel">Cancel</button>
+      <button class="btn btn-primary" id="settings-save">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/vendor/xlsx.full.min.js"></script>
+<script src="js/vendor/flatpickr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
