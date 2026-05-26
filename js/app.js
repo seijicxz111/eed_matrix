@@ -594,7 +594,10 @@ document.getElementById('table-body').addEventListener('click', e => {
     const r = data.find(x => x.id === certRowBtn.dataset.id);
     if (!r) return;
     certPrefillRecord = r;
-    document.getElementById('btn-cert').click();
+    (window._openCertModal || (() => Promise.reject(new Error('Cert not ready'))))().catch(err => {
+      console.error(err);
+      toast(err.message || 'Unable to load certificate template.', true);
+    });
     return;
   }
 
@@ -1503,7 +1506,7 @@ showDailyBackupReminder();
   const fallbackTemplateUrl = 'assets/eed_certificate_of_approval.pdf';
   let certLayout = JSON.parse(localStorage.getItem(CERT_LAYOUT_KEY) || '{"s3Offset":0,"ctrlOffset":0}');
 
-  if (!certModal || !btnCert || !stage || !canvas || !overlay) return;
+  if (!certModal || !stage || !canvas || !overlay) return;
 
   let pdfPage = null;
   let pageSize = { width: 842, height: 595 };
@@ -1923,12 +1926,7 @@ showDailyBackupReminder();
   }
 
   /* ── Event listeners ── */
-  btnCert.addEventListener('click', event => {
-    openCertModal(event).catch(err => {
-      console.error(err);
-      toast(err.message || 'Unable to load certificate template.', true);
-    });
-  }, true);
+  // btn-cert removed from toolbar; cert modal opened via per-row button only
 
   btnCertPrint?.addEventListener('click', event => {
     event?.preventDefault();
@@ -1991,4 +1989,7 @@ showDailyBackupReminder();
   });
 
   setupCertDatePickers();
+
+  // Expose for per-row cert button (defined outside this closure)
+  window._openCertModal = openCertModal;
 })();
