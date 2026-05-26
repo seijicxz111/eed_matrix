@@ -1861,9 +1861,23 @@ showDailyBackupReminder();
     if (!data.length && !certPrefillRecord) return;
     const last = certPrefillRecord || data[0];
     certPrefillRecord = null;
-    if (last.ctrlNo) document.getElementById('c-ctrlno').value = last.ctrlNo.replace(getCtrlPrefix(), '').replace('CTRL NO. EED ', '');
-    if (last.org)    document.getElementById('c-org').value    = last.org;
-    if (last.eed)    document.getElementById('c-project').value = last.eed;
+
+    // Control No: strip only the cert overlay prefix ("CTRL NO. EED "), leaving e.g. "26-27-0001"
+    if (last.ctrlNo) {
+      const ctrlPrefix = certFields.ctrlno.prefix || 'CTRL NO. EED ';
+      document.getElementById('c-ctrlno').value = last.ctrlNo.startsWith(ctrlPrefix)
+        ? last.ctrlNo.slice(ctrlPrefix.length)
+        : last.ctrlNo;
+    }
+
+    if (last.org)          document.getElementById('c-org').value     = last.org;
+    if (last.eed)          document.getElementById('c-project').value = last.eed;
+
+    // Date Approved → Approval Letter Date and Given Date
+    if (last.dateApproved) {
+      setDateInputValue('c-approvaldate', last.dateApproved);
+      setDateInputValue('c-givendate',    last.dateApproved);
+    }
   }
 
   /* ── Open modal ── */
