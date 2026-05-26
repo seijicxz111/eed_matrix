@@ -667,12 +667,7 @@ document.getElementById('bulk-status')?.addEventListener('change', e => {
 });
 
 document.getElementById('bulk-export')?.addEventListener('click', () => exportRowsToExcel(selectedRows(), 'eed-matrix-selected'));
-document.getElementById('bulk-cert')?.addEventListener('click', () => {
-  const first = selectedRows()[0];
-  if (!first) { toast('Select a record first.', true); return; }
-  certPrefillRecord = first;
-  document.getElementById('btn-cert').click();
-});
+
 
 document.getElementById('edit-cancel').addEventListener('click', () => document.getElementById('edit-modal').classList.remove('open'));
 document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
@@ -1903,6 +1898,7 @@ showDailyBackupReminder();
     applyCertLayout();
     prefillFromLastEntry();
     certModal.classList.add('open');
+    history.pushState({ certModal: true }, '');
     if (!pdfPage) await loadPreviewPdf();
     else await renderPdfPreview();
     renderOverlay();
@@ -1944,7 +1940,22 @@ showDailyBackupReminder();
     });
   }, true);
 
-  btnCertClose?.addEventListener('click', () => certModal.classList.remove('open'), true);
+  function closeCertModal() {
+    if (certModal.classList.contains('open')) {
+      certModal.classList.remove('open');
+      if (history.state && history.state.certModal) history.back();
+    }
+  }
+
+  btnCertClose?.addEventListener('click', () => {
+    certModal.classList.remove('open');
+  }, true);
+
+  window.addEventListener('popstate', e => {
+    if (certModal.classList.contains('open')) {
+      certModal.classList.remove('open');
+    }
+  });
 
   // Live re-render on any input/select change
   certInputs.forEach(id => {
