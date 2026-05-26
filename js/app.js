@@ -246,6 +246,9 @@ function render() {
       <td class="date-cell">${esc(r.dateApproved || '—')}</td>
       <td>
         <div class="actions-cell">
+          <button class="icon-btn cert-row-btn" data-id="${r.id}" title="Certificate Maker" style="color:var(--accent)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M9 21l3-3 3 3M9 18v-3M15 18v-3"/></svg>
+          </button>
           <button class="icon-btn edit-btn" data-id="${r.id}" title="Edit">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -583,8 +586,17 @@ document.getElementById('btn-save').addEventListener('click', () => {
 
 /* ── EDIT / DELETE ── */
 document.getElementById('table-body').addEventListener('click', e => {
+  const certRowBtn = e.target.closest('.cert-row-btn');
   const editBtn = e.target.closest('.edit-btn');
   const delBtn = e.target.closest('.del-btn');
+
+  if (certRowBtn) {
+    const r = data.find(x => x.id === certRowBtn.dataset.id);
+    if (!r) return;
+    certPrefillRecord = r;
+    document.getElementById('btn-cert').click();
+    return;
+  }
 
   if (editBtn) {
     const r = data.find(x => x.id === editBtn.dataset.id);

@@ -382,16 +382,13 @@
   <div class="cert-maker-wrap">
     <div class="cert-maker-sidebar">
       <div class="cert-sidebar-title"><i class="bi bi-award"></i> Certificate Maker</div>
-      <p class="cert-sidebar-note">Fill in the fields below then preview or print/download the certificate.</p>
+      <p class="cert-sidebar-note">Org, EED, and Control No. are auto-filled from the selected row. Fill in the remaining fields then preview or print/download the certificate.</p>
 
-      <div class="cert-field-group">
-        <label>Organization Name</label>
-        <input type="text" id="c-org" placeholder="e.g. MaPAP Society" />
-      </div>
-      <div class="cert-field-group">
-        <label>EED Project Name</label>
-        <input type="text" id="c-project" placeholder="e.g. Organizational Shirt" />
-      </div>
+      <!-- Hidden inputs: auto-filled from matrix row -->
+      <input type="hidden" id="c-org" />
+      <input type="hidden" id="c-project" />
+      <input type="hidden" id="c-ctrlno" />
+
       <div class="cert-field-group">
         <label>Approval Letter Date</label>
         <input type="date" id="c-approvaldate" />
@@ -410,10 +407,6 @@
       <div class="cert-field-group">
         <label>Given Date</label>
         <input type="date" id="c-givendate" />
-      </div>
-      <div class="cert-field-group">
-        <label>Control No.</label>
-        <input type="text" id="c-ctrlno" placeholder="e.g. EED 26-27-0001" />
       </div>
 
       <hr class="cert-divider" />
